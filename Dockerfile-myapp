@@ -1,0 +1,21 @@
+FROM fedora:35
+
+RUN useradd vscode
+
+RUN yum update -y
+
+RUN yum install vim git openvpn squid python3 -y
+
+RUN yum install htop python3-pip -y
+
+RUN pip install flask
+
+RUN yum install tmux -y
+
+RUN yum install sudo -y
+
+RUN yum install -y passwd
+
+RUN passwd -d vscode
+
+RUN usermod -aG wheel vscode

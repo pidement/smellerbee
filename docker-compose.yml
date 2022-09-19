@@ -1,0 +1,38 @@
+version: '3'
+
+services:
+
+  myapp:
+    depends_on:
+      - vpn
+    build:
+      context: .
+      dockerfile: Dockerfile-myapp
+    command: /bin/sh -c "while sleep 1000; do :; done"
+    network_mode: service:vpn
+
+  vpn:
+    build:
+      context: .
+      dockerfile: Dockerfile-vpn
+    cap_add:
+      - NET_ADMIN
+    restart: always
+    devices:
+      - /dev/net/tun
+    volumes:
+      - ${pwd}/data/ovpn:/ovpn:ro
+    privileged: true
+    command: /bin/sh -c "openvpn --config /ovpn/client.ovpn"
+    ports:
+      - 3128:3128
+
+  proxy:
+    depends_on:
+      - vpn
+    build:
+      context: .
+      dockerfile: Dockerfile-proxy
+    command: /bin/sh -c "/usr/sbin/squid --foreground"
+    network_mode: service:vpn
+    restart: always
